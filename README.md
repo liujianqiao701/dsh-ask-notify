@@ -133,6 +133,13 @@ dsh-ask-notify\
 └── assets\               市场截图
 ```
 
-## 许可
+## 作者 / Author
 
-MIT
+**liujianqiao701** — https://github.com/liujianqiao701
+
+问题反馈、建议或想法请开 Issue：
+https://github.com/liujianqiao701/dsh-ask-notify/issues
+
+## 许可 / License
+
+MIT — 见 [LICENSE](LICENSE)
