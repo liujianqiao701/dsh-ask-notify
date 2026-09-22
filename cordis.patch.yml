@@ -1,0 +1,9 @@
+# dsh-ask-notify bundle patch: inserts the plugin row into the web profile
+# roster. The single row mounts BOTH halves: the host side (`lib/index.js`,
+# deliberately an empty implementation — this plugin lives entirely in the
+# browser) and the browser half, which the `dsh.client` declaration in
+# package.json makes the client-modules node half load from `lib/client.js`
+# and serve at /plugins/ask-notify/client.js.
+- insert:
+    - id: ask-notify
+      name: 'dsh-ask-notify'
