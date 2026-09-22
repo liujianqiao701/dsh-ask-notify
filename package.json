@@ -1,0 +1,46 @@
+{
+  "name": "dsh-ask-notify",
+  "version": "1.0.0",
+  "description": "DSH web plugin: bottom-right reminder when the agent is blocked waiting for a human answer",
+  "type": "module",
+  "license": "MIT",
+  "author": "liujianqiao701",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liujianqiao701/dsh-ask-notify.git"
+  },
+  "homepage": "https://github.com/liujianqiao701/dsh-ask-notify#readme",
+  "bugs": {
+    "url": "https://github.com/liujianqiao701/dsh-ask-notify/issues"
+  },
+  "keywords": [
+    "deepseek",
+    "harness",
+    "dsh",
+    "dsh-plugin",
+    "notify",
+    "reminder",
+    "web"
+  ],
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime"
+      ],
+      "platform": "web"
+    }
+  }
+}
