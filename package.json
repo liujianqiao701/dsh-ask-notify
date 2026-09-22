@@ -4,7 +4,7 @@
   "description": "DSH web plugin: bottom-right reminder when the agent is blocked waiting for a human answer",
   "type": "module",
   "license": "MIT",
-  "author": "liujianqiao701",
+  "author": "liujianqiao701 (https://github.com/liujianqiao701)",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liujianqiao701/dsh-ask-notify.git"
