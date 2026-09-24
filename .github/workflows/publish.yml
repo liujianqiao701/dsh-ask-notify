@@ -1,0 +1,46 @@
+name: publish
+
+# 由 npm Trusted Publishing（OIDC）发布：不需要任何 token，自动带 provenance 签名。
+#
+# 触发方式：
+#   1) 在 GitHub 上「发布 Release」→ 自动发布到 npm（推荐，和现有发版流程一致）
+#   2) Actions 页面手动 Run workflow（用于演练/排障）
+#
+# ⚠️ 与 npm 站点上的配置必须逐字对应（Package → Settings → Trusted Publisher）：
+#      Organization or user : liujianqiao701
+#      Repository           : dsh-ask-notify
+#      Workflow filename    : publish.yml      ← 改文件名必须同步改站点配置
+#      Environment          : 留空
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write   # ← Trusted Publishing 必需：用于向 npm 换取短时凭证
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          # 刻意不设 registry-url：那会写出一行 ${NODE_AUTH_TOKEN} 占位，
+          # 反而让 npm 以为要走 token 认证。默认 registry 就是 registry.npmjs.org。
+
+      - name: 升级 npm（Trusted Publishing 需要 npm >= 11.5.1）
+        run: npm install -g npm@latest
+
+      - name: 打印环境与待发布版本（排障用）
+        run: |
+          node -v
+          npm -v
+          node -p "'package version: ' + require('./package.json').version"
+
+      - name: 发布到 npm（带 provenance）
+        run: npm publish --provenance --access public
