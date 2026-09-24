@@ -36,19 +36,23 @@ jobs:
       - name: 升级 npm（Trusted Publishing 需要 npm >= 11.5.1）
         run: npm install -g npm@latest
 
-      - name: 诊断（OIDC 环境 / npm 版本 / 认证配置）
+      - name: 诊断（OIDC 环境 / npm 版本）
         run: |
           node -v
           npm -v
           node -p "'package version: ' + require('./package.json').version"
-          echo "--- OIDC 环境变量 ---"
           for v in ACTIONS_ID_TOKEN_REQUEST_URL ACTIONS_ID_TOKEN_REQUEST_TOKEN; do
             if [ -n "${!v}" ]; then echo "$v = <set>"; else echo "$v = <MISSING>"; fi
           done
-          echo "--- registry ---"
           npm config get registry
-          echo "--- 有没有残留 token 干扰 ---"
-          npm config ls -l 2>/dev/null | grep -i -E 'auth|token' || echo "(无 auth/token 配置)"
 
       - name: 发布到 npm（带 provenance）
         run: npm publish --provenance --access public
+
+      - name: 失败时导出 npm 调试日志（看注册表对 OIDC 的原始答复）
+        if: failure()
+        run: |
+          for f in /home/runner/.npm/_logs/*-debug-0.log; do
+            echo "===== $f ====="
+            grep -i -E 'oidc|trusted|exchange|http fetch|http request|=20[0-9]|=4[0-9][0-9]|token|eneedauth|provenance' "$f" | tail -60
+          done
