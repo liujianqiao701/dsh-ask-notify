@@ -2,15 +2,15 @@ name: publish
 
 # 由 npm Trusted Publishing（OIDC）发布：不需要任何 token，自动带 provenance 签名。
 #
-# 触发方式：
-#   1) 在 GitHub 上「发布 Release」→ 自动发布到 npm（推荐，和现有发版流程一致）
-#   2) Actions 页面手动 Run workflow（用于演练/排障）
+# 触发：① GitHub 上「发布 Release」→ 自动发 npm（常规发版流程）
+#       ② Actions 页面手动 Run workflow（演练/排障用）
 #
 # ⚠️ 与 npm 站点上的配置必须逐字对应（Package → Settings → Trusted Publisher）：
 #      Organization or user : liujianqiao701
 #      Repository           : dsh-ask-notify
-#      Workflow filename    : publish.yml      ← 改文件名必须同步改站点配置
+#      Workflow filename    : publish.yml       ← 改文件名必须同步改站点配置
 #      Environment          : 留空
+#      Allowed actions      : ✅ Allow npm publish   ← 不勾就只能 stage、直接发布会 ENEEDAUTH
 
 on:
   release:
@@ -19,7 +19,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write   # ← Trusted Publishing 必需：用于向 npm 换取短时凭证
+  id-token: write   # ← Trusted Publishing 必需：向 npm 换取短时凭证
 
 jobs:
   publish:
@@ -36,11 +36,19 @@ jobs:
       - name: 升级 npm（Trusted Publishing 需要 npm >= 11.5.1）
         run: npm install -g npm@latest
 
-      - name: 打印环境与待发布版本（排障用）
+      - name: 诊断（OIDC 环境 / npm 版本 / 认证配置）
         run: |
           node -v
           npm -v
           node -p "'package version: ' + require('./package.json').version"
+          echo "--- OIDC 环境变量 ---"
+          for v in ACTIONS_ID_TOKEN_REQUEST_URL ACTIONS_ID_TOKEN_REQUEST_TOKEN; do
+            if [ -n "${!v}" ]; then echo "$v = <set>"; else echo "$v = <MISSING>"; fi
+          done
+          echo "--- registry ---"
+          npm config get registry
+          echo "--- 有没有残留 token 干扰 ---"
+          npm config ls -l 2>/dev/null | grep -i -E 'auth|token' || echo "(无 auth/token 配置)"
 
       - name: 发布到 npm（带 provenance）
         run: npm publish --provenance --access public
