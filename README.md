@@ -118,6 +118,12 @@ map 型成员（`sources().discovered` 列出探测结果），所以下次 harn
 > 与插件无关；等那个会话跑完（或先取消）再点即可。**注意：你和 agent 对话时它就在跑，
 > 这条闸门必然触发** —— 这是最容易被误判成"插件坏了"的一种情况。
 
+> ✅ **市场日志里这两行都是正常的，别当失败看**（2026-09-24 实测）：
+> `update-blocked … refused while agents are running` = 上面那把闸门拦下的那次点击；
+> `a too-young release blocks pnpm's lockfile verification … retrying once with
+> --config.minimum-release-age=0` = pnpm 的"新发布保护"（供应链防投毒）挡了一下，**市场自动重试**。
+> 真正的结果看紧跟其后那行：`update <插件> -> github:…#<sha> exit=0` = 成功。
+
 ## 自检（不用真等一个问题）
 
 在页面控制台执行：
