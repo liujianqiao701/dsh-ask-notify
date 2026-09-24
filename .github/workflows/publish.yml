@@ -1,21 +1,40 @@
 name: publish
 
-# 由 npm Trusted Publishing（OIDC）发布：不需要任何 token，自动带 provenance 签名。
+# ============================================================================
+# ⚠️ 当前状态（2026-09-24）：**仅手动触发** —— 发布 Release 不会自动跑。
 #
-# 触发：① GitHub 上「发布 Release」→ 自动发 npm（常规发版流程）
-#       ② Actions 页面手动 Run workflow（演练/排障用）
+# 原因：npm 站点侧的 Trusted Publisher 没能建起来。要修改「包的安全设置」，
+# npm 要求账号先开 2FA；而当时那条流程只提供 Security key（硬件密钥 / Windows
+# Hello），没有手机验证器（TOTP）选项，于是**暂缓配置**、改回 token 发布。
 #
-# ⚠️ 与 npm 站点上的配置必须逐字对应（Package → Settings → Trusted Publisher）：
-#      Organization or user : liujianqiao701
-#      Repository           : dsh-ask-notify
-#      Workflow filename    : publish.yml       ← 改文件名必须同步改站点配置
-#      Environment          : 留空
-#      Allowed actions      : ✅ Allow npm publish   ← 不勾就只能 stage、直接发布会 ENEEDAUTH
+# 证据（Actions run #4 的 npm 12.1.0 调试日志，实测而非推测）：
+#   28 http fetch GET  ...actions.githubusercontent.com/.../idtoken/... 200
+#      → GitHub 确实把 OIDC 票据交出来了
+#   30 http fetch POST 404 .../-/npm/v1/oidc/token/exchange/package/dsh-ask-notify
+#   31 verbose oidc Failed token exchange request with body message:
+#        OIDC token exchange error - package not found
+#      → 注册表里没有这条信任记录（与站点上仍是 "Select your publisher" 完全一致），
+#        于是 npm 回退成 need auth（ENEEDAUTH）
+#
+# 将来想启用，三步：
+#   ① npm 账号开 2FA（手机验证器 App 最便携；本机 PIN 走 Security key 也行，
+#      但凭证绑定设备，恢复码务必留存）
+#   ② 包 Settings → Trusted Publisher → GitHub Actions 填：
+#        Organization or user : liujianqiao701
+#        Repository           : dsh-ask-notify
+#        Workflow filename    : publish.yml      ← 只填文件名，别带路径
+#        Environment          : 留空
+#        Allowed actions      : ✅ Allow npm publish  ← 不勾只能 stage，直接发布会 ENEEDAUTH
+#      然后点 Set up connection
+#   ③ 把下面 `release:` 的触发加回来（加回前也可先手动 Run workflow 验证）
+#
+# 在此之前照旧用 token 发布：bypass-2FA 的 granular access token（实测可用）。
+# ============================================================================
 
 on:
-  release:
-    types: [published]
-  workflow_dispatch:
+  workflow_dispatch:        # 仅手动：Actions 页面 → Run workflow
+  # release:
+  #   types: [published]    # ← 站点配好 Trusted Publisher 后再取消注释
 
 permissions:
   contents: read
