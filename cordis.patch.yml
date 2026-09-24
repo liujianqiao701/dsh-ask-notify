@@ -3,7 +3,8 @@
 # deliberately an empty implementation — this plugin lives entirely in the
 # browser) and the browser half, which the `dsh.client` declaration in
 # package.json makes the client-modules node half load from `lib/client.js`
-# and serve at /plugins/ask-notify/client.js.
+# and serve at /plugins/dsh-ask-notify/client.js -- the route key is the PACKAGE
+# name, not this row's id (/plugins/ask-notify/client.js is a 404).
 - insert:
     - id: ask-notify
       name: 'dsh-ask-notify'
